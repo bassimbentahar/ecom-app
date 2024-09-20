@@ -1,0 +1,25 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://postgres-order:5432/customer_order
+    username: bassim
+    password: bassim
+  kafka:
+    producer:
+      bootstrap-servers: kafka:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: orderConfirmation:com.bassim.ecommerce.kafka.OrderConfirmation
+eureka:
+  instance:
+    hostname: order-api
+
+server:
+  port: 8070
+
+application:
+  config:
+    customer-url: http://customer-api:8090/api/v1/customers
+    payment-url: http://payment-api:8060/api/v1/payments
+    product-url: http://product-api:8050/api/v1/products
+

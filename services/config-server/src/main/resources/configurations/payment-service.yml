@@ -1,0 +1,19 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://postgres:5432/payment
+    username: bassim
+    password: bassim
+  kafka:
+    producer:
+      bootstrap-servers: kafka:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: paymentConfirmation:com.bassim.ecommerce.notification.PaymentNotificationRequest
+
+eureka:
+  instance:
+    hostname: payment-api
+
+server:
+  port: 8060

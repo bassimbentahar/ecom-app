@@ -1,0 +1,218 @@
+services:
+  postgres:
+    container_name: ms_pg_sql
+    image: postgres
+    environment:
+      POSTGRES_USER: bassim
+      POSTGRES_PASSWORD: bassim
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - microservices-net
+    restart: unless-stopped
+  postgres-order:
+    container_name: ms_pg_sql_order
+    image: postgres
+    environment:
+      POSTGRES_USER: bassim
+      POSTGRES_PASSWORD: bassim
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: order # This specifies the database to create
+    volumes:
+      - postgres-order:/var/lib/postgresql/data
+    ports:
+      - 5433:5432 # Exposing the container's PostgreSQL port 5432 to host's port 5433
+    networks:
+      - microservices-net
+    restart: unless-stopped
+  pgadmin:
+    container_name: ms_pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin@pgadmin.org}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - 5050:80
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  mongodb:
+    container_name: ms_mongo_db
+    image: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: bassim
+      MONGO_INITDB_ROOT_PASSWORD: bassim
+    volumes:
+      - mongo:/data
+    ports:
+      - 27017:27017
+    networks:
+      - microservices-net
+    restart: unless-stopped
+
+  mongo-express:
+    container_name: ms_mongo_express
+    image: mongo-express
+    restart: unless-stopped
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=bassim
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=bassim
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+    networks:
+      - microservices-net
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_SERVER_ID: 1
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 22181:2181
+    networks:
+      - microservices-net
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: ms-kafka
+    ports:
+      - 9092:9092
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+    networks:
+      - microservices-net
+
+  mail-dev:
+    container_name: ms_mail_dev
+    image: maildev/maildev
+    ports:
+      - 1080:1080
+      - 1025:1025
+    networks:
+      - microservices-net
+
+  zipkin:
+    container_name: zipkin
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+    networks:
+      - microservices-net
+
+  keycloak:
+    container_name: keycloak-ms
+    image: quay.io/keycloak/keycloak:24.0.2
+    ports:
+      - 8080:8080
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+
+    networks:
+      - microservices-net
+    command:
+      - "start-dev"
+
+  config-server-api:
+    container_name: config-server
+    image: config-server/config-server:1.0.0
+    ports:
+      - 8888:8888
+    networks:
+      - microservices-net
+
+  discovery-api:
+    container_name: discovery-api
+    image: discovery/discovery:1.0.0
+    ports:
+      - 8761:8761
+    networks:
+      - microservices-net
+    depends_on:
+      - config-server-api
+
+  gateway-api:
+    container_name: gateway-api
+    image: gateway/gateway:1.0.0
+    ports:
+      - 8222:8222
+    networks:
+      - microservices-net
+    depends_on:
+      - product-api
+
+  product-api:
+    container_name: product-api
+    image: product/product:1.0.0
+    ports:
+      - 8050:8050
+    networks:
+      - microservices-net
+    depends_on:
+      - postgres
+      - discovery-api
+  customer-api:
+    container_name: customer-api
+    image: customer/customer:1.0.0
+    ports:
+      - 8090:8090
+    networks:
+      - microservices-net
+    depends_on:
+      - mongodb
+      - discovery-api
+  payment-api:
+    container_name: payment-api
+    image: payment/payment:1.0.0
+    ports:
+      - 8060:8060
+    networks:
+      - microservices-net
+    depends_on:
+      - postgres
+      - discovery-api
+
+  order-api:
+    container_name: order-api
+    image: order/order:1.0.0
+    ports:
+      - 8070:8070
+    networks:
+      - microservices-net
+    depends_on:
+      - postgres
+      - discovery-api
+  notification-api:
+    container_name: notification-api
+    image: notification/notification:1.0.0
+    ports:
+      - 8040:8040
+    networks:
+      - microservices-net
+    depends_on:
+      - mongodb
+      - discovery-api
+networks:
+  microservices-net:
+    driver: bridge
+
+volumes:
+  postgres:
+  postgres-order:
+  pgadmin:
+  mongo:

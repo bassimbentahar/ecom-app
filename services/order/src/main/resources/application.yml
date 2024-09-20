@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: order-service
+  config:
+    import: optional:configserver:http://config-server:8888
+  sql:
+    init:
+      mode: always
+r2dbc:
+  show-sql: true
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          r2dbc: DEBUG
+

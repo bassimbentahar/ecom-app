@@ -1,0 +1,12 @@
+spring:
+  data:
+    mongodb:
+      host: localhost  # Utilisez 'mongodb' si c'est le nom du service dans Docker Compose
+      port: 27017
+      username: bassim
+      password: bassim
+      database: customer
+      authentication-database: admin
+
+server:
+  port: 8090

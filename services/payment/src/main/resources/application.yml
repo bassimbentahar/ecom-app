@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: payment-service
+  sql:
+    init:
+      mode: always
+  config:
+    import: optional:configserver:http://config-server:8888
+r2dbc:
+  show-sql: true
+logging:
+  level:
+    org:
+      springframework:
+        data:
+          r2dbc: DEBUG

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 100px;
+        }
+        .customerOrder-details {
+            margin-bottom: 20px;
+        }
+        .customerOrder-details h2 {
+            margin: 0;
+        }
+        .customerOrder-details p {
+            margin: 5px 0;
+        }
+        .purchaseResponses-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .purchaseResponses-table th, .purchaseResponses-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .purchaseResponses-table th {
+            background-color: #f4f4f4;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>Thank You for Your Order!</h1>
+    </div>
+    <div class="customerOrder-details">
+        <h2>Order Confirmation</h2>
+        <p>Dear <span th:text="${customerName}">Customer</span>,</p>
+        <p>Thank you for your customerOrder. Here are the details:</p>
+        <p><strong>Order Reference:</strong> <span th:text="${orderReference}">OrderReference</span></p>
+        <p><strong>Total Amount:</strong> <span th:text="${totalAmount}">TotalAmount</span></p>
+    </div>
+    <h3>Products Ordered:</h3>
+    <table class="purchaseResponses-table">
+        <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+            <td th:text="${product.name}">Product Name</td>
+            <td th:text="${product.quantity}">Quantity</td>
+            <td th:text="${product.price}">Price</td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="footer">
+        <p>Thank you for shopping with us!</p>
+    </div>
+</div>
+</body>
+</html>
